@@ -1,11 +1,20 @@
 {
-  "name": "weweb-schedule-vuecal",
-  "version": "0.0.1",
+  "name": "weweb-vue-cal-schedule",
+  "version": "1.0.0",
+  "description": "Vue Calendar Component for WeWeb.io",
+  "main": "src/wwElement.vue",
   "scripts": {
     "build": "weweb build",
     "serve": "weweb serve"
   },
+  "dependencies": {
+    "vue": "^3.5.13",
+    "vue-cal": "^5.0.1-rc.9"
+  },
+  "author": "",
+  "license": "MIT",
   "devDependencies": {
-    "@weweb/cli": "latest"
+    "@weweb/cli": "^3.8.13",
+    "webpack-cli": "^6.0.1"
   }
 }
