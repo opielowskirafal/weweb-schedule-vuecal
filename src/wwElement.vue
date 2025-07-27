@@ -158,7 +158,7 @@ export default {
         '--vuecal-event-color': this.content.eventColor || '#ffffff',
         '--vuecal-event-border-color': this.content.eventBorderColor || 'currentColor',
         '--vuecal-border-radius': `${this.content.borderRadius || 6}px`,
-        '--vuecal-height': `${this.content.height || 500}px`,
+        '--vuecal-height': `${this.content.height+'px' || '100%'}`,
       };
     }
   },
@@ -385,11 +385,15 @@ export default {
     if (this.content.selectedDate) {
       this.selectedDate = new Date(this.content.selectedDate);
     }
-  }
+  },
+  wrapperStyle() {
+      return {
+        height: this.content.height || "100%"}}
 }
 </script>
 
 <template>
+  <div class="vue-cal-wrapper" :style="wrapperStyle" :class="themeClasses">
   <vue-cal 
     ref="vuecal"
     :events="contentEvents"
@@ -442,16 +446,29 @@ export default {
       <strong :style="`color: ${schedule.color}`">{{ schedule.label }}</strong>
     </template>
   </vue-cal>
+  </div>
 </template>
 
 <style>
-/* Override vue-cal height. */
-.vuecal {
+
+.vue-cal-wrapper {
   height: 100%;
   width: 100%;
-  --vuecal-primary-color: #1976d2;
+  overflow: hidden; /* Pozwala vue-cal zarządzać scrollowaniem */
+}
+.vuecal {
+  --vuecal-primary-color: #6e56cf;
   flex: unset !important;
-  --vuecal-height: 100%;
+}
+
+.vuecal__event {
+  border-radius: var(--vuecal-border-radius) !important;
+  border: 1px solid var(--vuecal-event-border-color) !important;
+  overflow: hidden;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* GLOBAL UNRELATED STYLES */
@@ -463,28 +480,6 @@ export default {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  width: 100%;
-  height: 100%;
-  padding: 12px;
-}
-
-.vuecal__event {
-  border-radius: var(--vuecal-border-radius) !important;
-  border: 1px solid var(--vuecal-event-border-color) !important;
-  overflow: hidden;
-  padding: 6px 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .vuecal__event:hover {
@@ -541,7 +536,4 @@ body {
   border: none !important;
 }
 
-#app {
-  height: 100%;
-}
 </style>

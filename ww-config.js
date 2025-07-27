@@ -1,7 +1,8 @@
 export default {
   editor: {
     label: {
-      en: "My Element",
+      en: "Calendar Vue Schedule",
+      pl: "Kalendarz Vue Schedule"
     },
   },
   properties: {
@@ -10,6 +11,7 @@ export default {
         en: "Primary color",
       },
       type: "Color",
+      bindable: true,
       defaultValue: "#1976d2",
     },
     secondaryColor: {
@@ -17,6 +19,7 @@ export default {
         en: "Secondary color",
       },
       type: "Color",
+      bindable: true,
       defaultValue: "#ffffff",
     },
     baseColor: {
@@ -24,6 +27,7 @@ export default {
         en: "Base color",
       },
       type: "Color",
+      bindable: true,
       defaultValue: "#000000",
     },
     contrastColor: {
@@ -31,6 +35,7 @@ export default {
         en: "Contrast color",
       },
       type: "Color",
+      bindable: true,
       defaultValue: "#ffffff",
     },
     borderColor: {
@@ -38,6 +43,7 @@ export default {
         en: "Border color",
       },
       type: "Color",
+      bindable: true,
       defaultValue: "rgba(0, 0, 0, 0.08)",
     },
     headerColor: {
@@ -45,6 +51,7 @@ export default {
         en: "Header color",
       },
       type: "Color",
+      bindable: true,
       defaultValue: "#ffffff",
     },
     eventColor: {
@@ -52,6 +59,7 @@ export default {
         en: "Event color",
       },
       type: "Color",
+      bindable: true,
       defaultValue: "#ffffff",
     },
     eventBorderColor: {
@@ -59,6 +67,7 @@ export default {
         en: "Event border color",
       },
       type: "Color",
+      bindable: true,
       defaultValue: "currentColor",
     },
     borderRadius: {
@@ -66,6 +75,7 @@ export default {
         en: "Border radius (px)",
       },
       type: "Number",
+      bindable: true,
       defaultValue: 6,
     },
     height: {
@@ -73,13 +83,15 @@ export default {
         en: "Height (px)",
       },
       type: "Number",
-      defaultValue: 500,
+      bindable: true,
+      defaultValue: 800,
     },
     minScheduleWidth: {
       label: {
         en: "Min schedule width (px)",
       },
       type: "Number",
+      bindable: true,
       defaultValue: 0,
     },
     minCellWidth: {
@@ -87,6 +99,7 @@ export default {
         en: "Min cell width (px)",
       },
       type: "Number",
+      bindable: true,
       defaultValue: 0,
     },
     transitionDuration: {
@@ -94,6 +107,7 @@ export default {
         en: "Transition duration (s)",
       },
       type: "Number",
+      bindable: true,
       defaultValue: 0.25,
     },
     events: {
@@ -227,21 +241,25 @@ export default {
     showEventTime: {
       label: { en: "Show event time", pl: "Pokaż czas wydarzenia" },
       type: "OnOff",
+      bindable: true,
       defaultValue: true,
     },
     timeStart: {
       label: { en: "Start hour", pl: "Godzina rozpoczęcia" },
       type: "Number",
+      bindable: true,
       defaultValue: 8,
     },
     timeEnd: {
       label: { en: "End hour", pl: "Godzina zakończenia" },
       type: "Number",
+      bindable: true,
       defaultValue: 20,
     },
     timeStep: {
       label: { en: "Time step (min)", pl: "Krok czasu (min)" },
       type: "Number",
+      bindable: true,
       defaultValue: 30,
     },
     locale: {
@@ -353,121 +371,145 @@ export default {
     allDayEvents: {
       label: { en: "All day events", pl: "Wydarzenia całodniowe" },
       type: "OnOff",
+      bindable: true,
       defaultValue: true,
     },
     hideWeekends: {
       label: { en: "Hide weekends", pl: "Ukryj weekendy" },
       type: "OnOff",
+      bindable: true,
       defaultValue: false,
     },
     allowEventCreation: {
       label: { en: "Allow event creation", pl: "Pozwól na tworzenie wydarzeń" },
       type: "OnOff",
+      bindable: true,
       defaultValue: true,
     },
     allowEventResize: {
       label: { en: "Allow event resize", pl: "Pozwól na zmianę rozmiaru wydarzeń" },
       type: "OnOff",
+      bindable: true,
       defaultValue: true,
     },
     allowEventDrag: {
       label: { en: "Allow event drag", pl: "Pozwól na przeciąganie wydarzeń" },
       type: "OnOff",
+      bindable: true,
       defaultValue: true,
     },
     allowEventDelete: {
       label: { en: "Allow event delete", pl: "Pozwól na usuwanie wydarzeń" },
       type: "OnOff",
+      bindable: true,
       defaultValue: true,
     },
     minEventWidth: {
       label: { en: "Min event width (px)", pl: "Minimalna szerokość wydarzenia (px)" },
       type: "Number",
+      bindable: true,
       defaultValue: 0,
     },
     disableDays: {
       label: { en: "Disable days", pl: "Wyłączone dni" },
       type: "Array",
+      bindable: true,
       defaultValue: [],
     },
     snapToInterval: {
       label: { en: "Snap to interval (min)", pl: "Przyleganie do interwału (min)" },
       type: "Number",
+      bindable: true,
       defaultValue: 30,
     },
     allowEventOverlap: {
       label: { en: "Allow event overlap", pl: "Pozwól na nakładanie wydarzeń" },
       type: "OnOff",
+      bindable: true,
       defaultValue: true,
     },
     specialHours: {
       label: { en: "Special hours", pl: "Godziny specjalne" },
       type: "Array",
+      bindable: true,
       defaultValue: [],
     },
     timeCellHeight: {
       label: { en: "Time cell height (px)", pl: "Wysokość komórki czasu (px)" },
       type: "Number",
+      bindable: true,
       defaultValue: 40,
     },
     twelveHour: {
       label: { en: "12-hour format", pl: "Format 12-godzinny" },
       type: "OnOff",
+      bindable: true,
       defaultValue: false,
     },
     datePicker: {
       label: { en: "Date picker", pl: "Wybór daty" },
       type: "OnOff",
+      bindable: true,
       defaultValue: false,
     },
     clickToNavigate: {
       label: { en: "Click to navigate", pl: "Kliknij, aby nawigować" },
       type: "OnOff",
+      bindable: true,
       defaultValue: false,
     },
     viewDate: {
       label: { en: "View date", pl: "Data widoku" },
       type: "Text",
+      bindable: true,
       defaultValue: "",
     },
     selectedDate: {
       label: { en: "Selected date", pl: "Wybrana data" },
       type: "Text",
+      bindable: true,
       defaultValue: "",
     },
     minDate: {
       label: { en: "Min date", pl: "Minimalna data" },
       type: "Text",
+      bindable: true,
       defaultValue: "",
     },
     maxDate: {
       label: { en: "Max date", pl: "Maksymalna data" },
       type: "Text",
+      bindable: true,
       defaultValue: "",
     },
     weekNumbers: {
       label: { en: "Show week numbers", pl: "Pokaż numery tygodni" },
       type: "OnOff",
+      bindable: true,
       defaultValue: false,
     },
     todayButton: {
       label: { en: "Show today button", pl: "Pokaż przycisk 'Dzisiaj'" },
       type: "OnOff",
+      bindable: true,
       defaultValue: true,
     },
     titleBar: {
       label: { en: "Show title bar", pl: "Pasek tytułu" },
       type: "OnOff",
+      bindable: true,
       defaultValue: true,
     },
     viewsBar: {
       label: { en: "Show views bar", pl: "Pasek widoków" },
       type: "OnOff",
+      bindable: true,
       defaultValue: true,
     },
     watchRealTime: {
       label: { en: "Watch real time", pl: "Śledź czas rzeczywisty" },
       type: "OnOff",
+      bindable: true,
       defaultValue: false,
     },
     schedules: {
