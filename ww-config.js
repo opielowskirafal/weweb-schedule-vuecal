@@ -368,6 +368,27 @@ export default {
         tooltip: "Bind to a string value for the default view: year | month | week | day",
       },
     },
+    sm: {
+      label: {
+        en: "Small size",
+        pl: "Mały rozmiar",
+      },
+      type: "OnOff",
+      defaultValue: false,
+      section: "style",
+      bindable: true,
+    },
+
+    xs: {
+      label: {
+        en: "Extra small size",
+        pl: "Bardzo mały rozmiar",
+      },
+      type: "OnOff",
+      defaultValue: false,
+      section: "style",
+      bindable: true,
+    },
     allDayEvents: {
       label: { en: "All day events", pl: "Wydarzenia całodniowe" },
       type: "OnOff",

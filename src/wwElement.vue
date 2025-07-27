@@ -431,7 +431,7 @@ export default {
     :time-cell-height="content.timeCellHeight || 40"
     :twelve-hour="!!content.twelveHour"
     events-on-month-view
-    :date-picker="!!content.datePicker"
+   :date-picker="content.datePicker"
     :click-to-navigate="!!content.clickToNavigate"
     :view-date="computedViewDate"
     :selected-date="computedSelectedDate"
@@ -454,6 +454,8 @@ export default {
     @update:selectedDate="onSelectedDateUpdate"
     @event-resize-end="handleEventResizeEnd"
     @cell-click="onCellClick"
+    :sm="content.sm"
+    :xs="content.xs"
   >
     <template #schedule-heading="{ schedule }">
       <strong :style="`color: ${schedule.color}`">{{ schedule.label }}</strong>
