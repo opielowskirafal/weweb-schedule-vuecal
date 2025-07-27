@@ -20,6 +20,33 @@ export default {
       required: true 
     }
   },
+
+  setup(props) {
+    // === ZMIENNA DLA INFORMACJI O WIDOKU ===
+    const { value: currentViewInfo, setValue: setCurrentViewInfo } = wwLib.wwVariable.useComponentVariable({
+      uid: props.uid,
+      name: "currentViewInfo",
+      type: 'Object',
+      defaultValue: null,
+      readonly: true,
+      resettable: false,
+    });
+
+    // === NOWA ZMIENNA DLA ZAZNACZONEJ DATY ===
+    const { value: selectedDateInfo, setValue: setSelectedDateInfo } = wwLib.wwVariable.useComponentVariable({
+      uid: props.uid,
+      name: "selectedDateInfo",
+      type: 'Object',
+      defaultValue: null,
+      readonly: true,
+      resettable: false,
+    });
+
+    return {
+      setCurrentViewInfo,
+      setSelectedDateInfo,
+    };
+  },
   data() {
     return {
       selectedDate: new Date(),
@@ -347,20 +374,63 @@ export default {
     },
 
     onViewChange(viewInfo) {
-      const formattedViewInfo = this.formatDates(viewInfo);
+      console.log("[VueCal] onViewChange received (ACTUAL structure):", viewInfo);
+
+      // 1. Zaktualizuj zmienną WeWeb za pomocą wspólnej metody
+      if (typeof this.setCurrentViewInfo === 'function') {
+        const viewName = viewInfo?.id || null;
+        const startDateISO = this.safeToISOString(viewInfo?.start);
+        const endDateISO = this.safeToISOString(viewInfo?.end);
+        const viewInfoForWeWebVariable = {
+          view: viewName,
+          startDate: startDateISO,
+          endDate: endDateISO,
+          firstCellDate: this.safeToISOString(viewInfo?.firstCellDate),
+          lastCellDate: this.safeToISOString(viewInfo?.lastCellDate),
+        };
+        this.setCurrentViewInfo(viewInfoForWeWebVariable);
+        console.log("[VueCal] Updated 'currentViewInfo' WeWeb variable via onViewChange:", viewInfoForWeWebVariable);
+      }
+
+      // 2. Logika emitowania zdarzenia trigger-event
+      const viewName = viewInfo?.id || null;
+      const startDateObj = viewInfo?.start instanceof Date ? viewInfo.start : (viewInfo?.start ? new Date(viewInfo.start) : null);
+      const endDateObj = viewInfo?.end instanceof Date ? viewInfo.end : (viewInfo?.end ? new Date(viewInfo.end) : null);
+
+      if (!startDateObj || !endDateObj) {
+        console.warn("[VueCal] Nie można utworzyć obiektów Date dla trigger-event z viewInfo.start/end. Zdarzenie może zawierać nulle.", viewInfo);
+      }
+
       this.$emit("trigger-event", {
         name: "view:change",
-        event: formattedViewInfo,
+        event: {
+          view: viewName,
+          startDate: startDateObj,
+          startDateISO: this.safeToISOString(startDateObj),
+          endDate: endDateObj,
+          endDateISO: this.safeToISOString(endDateObj),
+        },
       });
+      console.log("[VueCal] Emitted trigger-event 'view:change' from onViewChange.");
     },
 
     onSelectedDateUpdate(newDate) {
       if (!newDate) return;
 
+      // Aktualizujemy lokalny stan
       this.selectedDate = newDate;
 
+      // Aktualizujemy zmienną WeWeb
+      if (typeof this.setSelectedDateInfo === 'function') {
+        this.setSelectedDateInfo({
+          date: newDate,
+          dateISO: newDate.toISOString()
+        });
+      }
+
+      // Emitujemy event dla WeWeb
       this.$emit("trigger-event", {
-        name: "selectedDate:update",
+        name: "date:selected",
         event: {
           date: newDate,
           dateISO: newDate.toISOString()
@@ -395,9 +465,84 @@ export default {
   },
 
   mounted() {
-    if (this.content.selectedDate) {
-      this.selectedDate = new Date(this.content.selectedDate);
+    if (this.content.initialDate) {
+      this.selectedDate = new Date(this.content.initialDate);
     }
+
+    // Dodajemy inicjalizację currentViewInfo
+    this.$nextTick(() => {
+      if (this.$refs.vuecal) {
+        const vuecal = this.$refs.vuecal;
+        const currentDate = this.computedViewDate;
+        const view = this.content.view || 'week';
+
+        // Obliczamy prawidłowe daty start i end w zależności od widoku
+        let startDate = new Date(currentDate);
+        let endDate = new Date(currentDate);
+
+        switch (view) {
+          case 'week':
+            // Ustawiamy na poniedziałek bieżącego tygodnia
+            const day = startDate.getDay();
+            const diff = startDate.getDate() - day + (day === 0 ? -6 : 1);
+            startDate = new Date(startDate.setDate(diff));
+            startDate.setHours(0, 0, 0, 0); // Ustawiamy na 00:00:00
+
+            // Końcowa data to niedziela (start + 6 dni)
+            endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 6);
+            endDate.setHours(23, 59, 59, 999); // Ustawiamy na 23:59:59.999
+            break;
+
+          case 'month':
+            // Pierwszy dzień miesiąca
+            startDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+            startDate.setHours(0, 0, 0, 0);
+
+            // Ostatni dzień miesiąca
+            endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
+            endDate.setHours(23, 59, 59, 999);
+            break;
+
+          case 'day':
+            // Dla widoku dziennego
+            startDate.setHours(0, 0, 0, 0);
+            endDate.setHours(23, 59, 59, 999);
+            break;
+
+          case 'year':
+            // Pierwszy dzień roku
+            startDate = new Date(startDate.getFullYear(), 0, 1);
+            startDate.setHours(0, 0, 0, 0);
+
+            // Ostatni dzień roku
+            endDate = new Date(startDate.getFullYear(), 11, 31);
+            endDate.setHours(23, 59, 59, 999);
+            break;
+        }
+
+        // Tworzymy obiekt z informacjami o widoku
+        const viewInfo = {
+          id: view,
+          start: startDate,
+          end: endDate,
+          firstCellDate: startDate,
+          lastCellDate: endDate
+        };
+
+        // Aktualizujemy currentViewInfo
+        if (typeof this.setCurrentViewInfo === 'function') {
+          const viewInfoForWeWebVariable = {
+            view: view,
+            startDate: this.safeToISOString(startDate),
+            endDate: this.safeToISOString(endDate),
+            firstCellDate: this.safeToISOString(startDate),
+            lastCellDate: this.safeToISOString(endDate),
+          };
+          this.setCurrentViewInfo(viewInfoForWeWebVariable);
+        }
+      }
+    });
   },
   wrapperStyle() {
       return {
