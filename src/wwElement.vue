@@ -181,6 +181,26 @@ export default {
       }
     },
 
+    formatDates(obj) {
+      if (Array.isArray(obj)) {
+        return obj.map(this.formatDates);
+      } else if (obj && typeof obj === 'object') {
+        const newObj = {};
+        for (const key in obj) {
+          if (
+            obj[key] instanceof Date ||
+            (obj[key] && typeof obj[key].toISOString === 'function')
+          ) {
+            newObj[key] = this.safeToISOString(obj[key]);
+          } else {
+            newObj[key] = this.formatDates(obj[key]);
+          }
+        }
+        return newObj;
+      }
+      return obj;
+    },
+
     // KLUCZOWA ZMIANA: Używamy tej samej sygnatury co w działającym kodzie
     handleEventClick(payload, domEvent) {
       const event = payload.event;
@@ -327,17 +347,10 @@ export default {
     },
 
     onViewChange(viewInfo) {
-      console.log("View changed:", viewInfo);
-
+      const formattedViewInfo = this.formatDates(viewInfo);
       this.$emit("trigger-event", {
         name: "view:change",
-        event: {
-          view: viewInfo?.id || null,
-          startDate: viewInfo?.start,
-          startDateISO: this.safeToISOString(viewInfo?.start),
-          endDate: viewInfo?.end,
-          endDateISO: this.safeToISOString(viewInfo?.end),
-        },
+        event: formattedViewInfo,
       });
     },
 
