@@ -337,6 +337,7 @@ export default {
         event: {
           event: {
             ...event,
+            eventSchedule: event.schedule || null,
             start: this.safeToISOString(event.start),
             end: this.safeToISOString(event.end),
             startISO: this.safeToISOString(event.start),
