@@ -11,13 +11,13 @@ export default {
     VueCal,
   },
   props: {
-    content: { 
-      type: Object, 
-      required: true 
+    content: {
+      type: Object,
+      required: true
     },
-    uid: { 
-      type: String, 
-      required: true 
+    uid: {
+      type: String,
+      required: true
     }
   },
 
@@ -104,7 +104,7 @@ export default {
           draggable: event.draggable !== undefined ? Boolean(event.draggable) : true,
           backgroundColor: event.backgroundColor || this.content.primaryColor || "#1976d2",
           color: event.color || this.content.eventColor || "#FFFFFF",
-          schedule: event.schedule !== undefined ? event.schedule : null,
+          schedule: Number.isInteger(Number(event.schedule)) ? Number(event.schedule) : null,
         };
       });
     },
@@ -185,7 +185,7 @@ export default {
         '--vuecal-event-color': this.content.eventColor || '#ffffff',
         '--vuecal-event-border-color': this.content.eventBorderColor || 'currentColor',
         '--vuecal-border-radius': `${this.content.borderRadius || 6}px`,
-        '--vuecal-height': `${this.content.height+'px' || '100%'}`,
+        '--vuecal-height': `${this.content.height + 'px' || '100%'}`,
       };
     }
   },
@@ -232,7 +232,7 @@ export default {
     handleEventClick(payload, domEvent) {
       const event = payload.event;
       console.log("Event clicked:", event.id);
-      
+
       if (!event) return;
 
       this.$emit("trigger-event", {
@@ -245,63 +245,6 @@ export default {
           },
         },
       });
-    },
-
-    createEvent(data) {
-      try {
-        console.log("createEvent received:", data);
-
-        if (!data || !data.event) {
-          console.error("No event data in createEvent payload");
-          if (typeof data?.resolve === "function") {
-            data.resolve(null);
-          }
-          return;
-        }
-
-        const event = data.event;
-        const resolve = data.resolve;
-        const eventId = Math.random().toString(36).substring(2);
-
-        const newEvent = {
-          id: eventId,
-          title: "New Event",
-          content: event.content || "",
-          start: this.safeToISOString(event.start),
-          end: this.safeToISOString(event.end),
-          allDay: event.allDay || false,
-          color: this.content.eventColor || "#FFFFFF",
-          backgroundColor: this.content.primaryColor || "#1976d2",
-          resizable: true,
-          draggable: true,
-          deletable: true,
-          recurring: event.recurring || null,
-          schedule: event.schedule !== undefined ? event.schedule : null,
-          background: event.background || false,
-          class: event.class || "",
-          ...event, // pozwala na niestandardowe pola
-        };
-
-        this.$emit("trigger-event", {
-          name: "event:create",
-          event: {
-            event: {
-              ...newEvent,
-              startISO: this.safeToISOString(event.start),
-              endISO: this.safeToISOString(event.end),
-            },
-          },
-        });
-
-        if (typeof resolve === "function") {
-          resolve(newEvent);
-        }
-      } catch (error) {
-        console.error("Error in createEvent:", error);
-        if (data && typeof data.resolve === "function") {
-          data.resolve(null);
-        }
-      }
     },
 
     onEventDelete(payload) {
@@ -332,12 +275,30 @@ export default {
         return;
       }
 
+      console.log("onEventDrop - event object:", event);
+      console.log("onEventDrop - originalEvent object:", originalEvent);
+
+      // Pobierz schedule z różnych możliwych miejsc
+      let scheduleValue = null;
+
+      // Sprawdź różne możliwe lokalizacje wartości schedule
+      if (Number.isInteger(Number(event.schedule))) {
+        scheduleValue = Number(event.schedule);
+      } else if (originalEvent && Number.isInteger(Number(originalEvent.schedule))) {
+        scheduleValue = Number(originalEvent.schedule);
+      } else if (Number.isInteger(Number(event.eventSchedule))) {
+        scheduleValue = Number(event.eventSchedule);
+      }
+
+      console.log("Detected schedule value:", scheduleValue);
+
       this.$emit("trigger-event", {
         name: "event:drop",
         event: {
           event: {
             ...event,
-            eventSchedule: event.schedule || null,
+            schedule: scheduleValue,
+            eventSchedule: scheduleValue,
             start: this.safeToISOString(event.start),
             end: this.safeToISOString(event.end),
             startISO: this.safeToISOString(event.start),
@@ -447,7 +408,7 @@ export default {
             cell: {
               date: cell.start,
               dateISO: this.safeToISOString(cell.start),
-              schedule: cell.schedule !== undefined ? cell.schedule : null,
+              schedule: Number.isInteger(Number(cell.schedule)) ? Number(cell.schedule) : null,
             },
           },
         });
@@ -546,77 +507,48 @@ export default {
     });
   },
   wrapperStyle() {
-      return {
-        height: this.content.height || "100%"}}
+    return {
+      height: this.content.height || "100%"
+    }
+  }
 }
 </script>
 
 <template>
   <div class="vue-cal-wrapper" :style="wrapperStyle" :class="themeClasses">
-  <vue-cal 
-    ref="vuecal"
-    :events="contentEvents"
-    :views="availableViews"
-    :view="defaultView"
-    :schedules="contentSchedules"
-    :style="vueCalStyles"
-    :time="content.showEventTime !== false"
-    :time-from="(parseInt(content.timeStart) || 8) * 60"
-    :time-to="(parseInt(content.timeEnd) || 20) * 60"
-    :time-step="parseInt(content.timeStep) || 30"
-    :all-day-events="content.allDayEvents !== false"
-    :hide-weekends="!!content.hideWeekends"
-    :event-create-min-drag="15"
-    :dark="content.darkMode"
-    :editable-events="editableEvents"
-    :min-event-width="content.minEventWidth || 0"
-    :disable-days="content.disableDays || []"
-    :snap-to-interval="parseInt(content.snapToInterval) || parseInt(content.timeStep) || 30"
-    :event-overlap="content.allowEventOverlap !== false"
-    :special-hours="processedSpecialHours"
-    :time-cell-height="content.timeCellHeight || 40"
-    :twelve-hour="!!content.twelveHour"
-    events-on-month-view
-   :date-picker="content.datePicker"
-    :click-to-navigate="!!content.clickToNavigate"
-    :view-date="computedViewDate"
-    :selected-date="computedSelectedDate"
-    :min-date="content.minDate || ''"
-    :max-date="content.maxDate || ''"
-    :week-numbers="!!content.weekNumbers"
-    :today-button="content.todayButton !== false"
-    :title-bar="content.titleBar !== false"
-    :views-bar="content.viewsBar !== false"
-    :watch-real-time="!!content.watchRealTime"
-    :locale="locale"
-    :timezone="content.timezone || 'auto'"
-    time-at-cursor
-    @ready="onReady"
-    @event-click="handleEventClick"
-    @event-create="createEvent"
-    @event-delete="onEventDelete"
-    @event-drop="onEventDrop"
-    @view-change="onViewChange"
-    @update:selectedDate="onSelectedDateUpdate"
-    @event-resize-end="handleEventResizeEnd"
-    @cell-click="onCellClick"
-    :sm="content.sm"
-    :xs="content.xs"
-  >
-    <template #schedule-heading="{ schedule }">
-      <strong :style="`color: ${schedule.color}`">{{ schedule.label }}</strong>
-    </template>
-  </vue-cal>
+    <vue-cal ref="vuecal" :events="contentEvents" :views="availableViews" :view="defaultView"
+      :schedules="contentSchedules" :style="vueCalStyles" :time="content.showEventTime !== false"
+      :time-from="(parseInt(content.timeStart) || 8) * 60" :time-to="(parseInt(content.timeEnd) || 20) * 60"
+      :time-step="parseInt(content.timeStep) || 30" :all-day-events="content.allDayEvents !== false"
+      :hide-weekends="!!content.hideWeekends" :event-create-min-drag="15" :dark="content.darkMode"
+      :editable-events="editableEvents" :min-event-width="content.minEventWidth || 0"
+      :disable-days="content.disableDays || []"
+      :snap-to-interval="parseInt(content.snapToInterval) || parseInt(content.timeStep) || 30"
+      :event-overlap="content.allowEventOverlap !== false" :special-hours="processedSpecialHours"
+      :time-cell-height="content.timeCellHeight || 40" :twelve-hour="!!content.twelveHour" events-on-month-view
+      :date-picker="content.datePicker" :click-to-navigate="!!content.clickToNavigate" :view-date="computedViewDate"
+      :selected-date="computedSelectedDate" :min-date="content.minDate || ''" :max-date="content.maxDate || ''"
+      :week-numbers="!!content.weekNumbers" :today-button="content.todayButton !== false"
+      :title-bar="content.titleBar !== false" :views-bar="content.viewsBar !== false"
+      :watch-real-time="!!content.watchRealTime" :locale="locale" :timezone="content.timezone || 'auto'" time-at-cursor
+      @ready="onReady" @event-click="handleEventClick" @event-create="createEvent" @event-delete="onEventDelete"
+      @event-drop="onEventDrop" @view-change="onViewChange" @update:selectedDate="onSelectedDateUpdate"
+      @event-resize-end="handleEventResizeEnd" @cell-click="onCellClick" :sm="content.sm" :xs="content.xs">
+      <template #schedule-heading="{ schedule }">
+        <strong :style="`color: ${schedule.color}`">{{ schedule.label }}</strong>
+      </template>
+    </vue-cal>
   </div>
 </template>
 
 <style>
-
 .vue-cal-wrapper {
   height: 100%;
   width: 100%;
-  overflow: hidden; /* Pozwala vue-cal zarządzać scrollowaniem */
+  overflow: hidden;
+  /* Pozwala vue-cal zarządzać scrollowaniem */
 }
+
 .vuecal {
   --vuecal-primary-color: #6e56cf;
   flex: unset !important;
@@ -671,9 +603,11 @@ export default {
   text-align: center;
   width: 100%;
 }
-.vuecal__cell{
-  border-right: 1px solid var(--vuecal-border-color) !important;;
-  
+
+.vuecal__cell {
+  border-right: 1px solid var(--vuecal-border-color) !important;
+  ;
+
 }
 
 .vuecal__body .schedule1 {
@@ -691,10 +625,10 @@ export default {
 .vuecal__body .schedule4 {
   background-color: rgba(255, 235, 238, 0.7);
 }
+
 .vuecal__event.vuecal__event--background.background {
   background: repeating-linear-gradient(45deg, transparent 0 10px, #0000004f 10px 20px) !important;
   background-color: transparent !important;
   border: none !important;
 }
-
 </style>
